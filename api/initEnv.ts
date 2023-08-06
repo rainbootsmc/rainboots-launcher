@@ -124,7 +124,7 @@ const getInstalledModFilenames = (): string[] => {
   ensureDir(path.dirname(installedModsPath));
   let json: string[] = [];
   try {
-    json = z.array(z.string()).parse(fs.readFileSync(installedModsPath));
+    json = z.array(z.string()).parse(JSON.parse(fs.readFileSync(installedModsPath).toString()));
   } catch (e) {
     // Empty
   }
