@@ -10,6 +10,8 @@ import { getModInfo } from './external/modrinth.ts';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { getSettings, LauncherSettings } from './settings.ts';
+import { app } from 'electron';
+import Logger from 'electron-log';
 
 export const ModEntry = z.object({
   slug: z.string(),
@@ -46,6 +48,7 @@ export type InitEnvResult = {
 export const DEFAULT_MANIFEST_URL = 'https://rainbootsmc.github.io/rainboots-launcher-manifest/manifest.json';
 const installedModsPath = path.join(getInstanceDir(), 'installed_mods.json');
 const modsDir = path.join(getInstanceDir(), 'mods');
+const lastLauncherVersionPath = path.join(getInstanceDir(), 'last_launcher_version');
 
 export let manifest: LauncherManifest | undefined;
 export let fabricVersion: FabricVersion | undefined;
@@ -112,6 +115,8 @@ const initMods = async () => {
   }
   ensureDir(getInstanceDir());
 
+  migrate();
+
   const installedModFilenames = getInstalledModFilenames();
   deleteMods(installedModFilenames);
 
@@ -139,9 +144,12 @@ const saveInstalledModFilenames = (filenames: string[]) => {
 const deleteMods = (filenames: string[]) => {
   ensureDir(modsDir);
 
-  filenames.forEach(filename => {
-    fs.unlinkSync(path.join(modsDir, filename));
-  });
+  filenames
+    .map(filename => path.join(modsDir, filename))
+    .filter(path => fs.existsSync(path))
+    .forEach(path => {
+      fs.unlinkSync(path);
+    });
 };
 
 const installMod = async (modEntry: ModEntry): Promise<string> => {
@@ -154,4 +162,18 @@ const installMod = async (modEntry: ModEntry): Promise<string> => {
   }
   await streamPipeline(body, createWriteStream(path.join(modsDir, modInfo.filename)));
   return modInfo.filename;
+};
+
+const migrate = () => {
+  migrate_v0_1_0();
+  fs.writeFileSync(lastLauncherVersionPath, app.getVersion());
+};
+
+const migrate_v0_1_0 = () => {
+  if (!fs.existsSync(lastLauncherVersionPath) && fs.existsSync(modsDir)) {
+    Logger.info('ランチャーを0.1.0からマイグレートします');
+    if (fs.existsSync(modsDir)) {
+      fs.rmSync(modsDir, { recursive: true, force: true });
+    }
+  }
 };
