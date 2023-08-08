@@ -23,6 +23,10 @@ export const appRouter = t.router({
     await shell.openPath(settingsFilePath);
   }),
   getVersion: procedure.query(() => app.getVersion()),
+  relaunch: procedure.mutation(() => {
+    app.relaunch();
+    app.quit();
+  }),
 
   initEnv: procedure.mutation(async () => await initEnv()),
   startAuth: procedure.mutation(async () => refreshOrLoginMclcUser()),

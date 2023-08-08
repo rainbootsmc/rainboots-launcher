@@ -6,8 +6,8 @@ export const [theme, vars] = createTheme({
   },
   color: {
     dark: {
-      primary: 'hsla(210,7%,12%, 1)',
-      secondary: '#23262B',
+      primary: 'hsla(210, 7%, 12%, 1)',
+      secondary: 'hsl(218, 10%, 15%)',
     },
     white: '#EDEEF2',
     accent: 'hsl(45,93%,58%)',

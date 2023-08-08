@@ -1,0 +1,4 @@
+owner: rainbootsmc
+repo: rainboots-launcher
+provider: github
+updaterCacheDirName: rainboots-launcher-updater
