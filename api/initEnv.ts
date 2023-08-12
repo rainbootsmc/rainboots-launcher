@@ -117,12 +117,16 @@ const initMods = async () => {
 
   migrate();
 
-  const installedModFilenames = getInstalledModFilenames();
-  deleteMods(installedModFilenames);
+  try {
+    const installedModFilenames = getInstalledModFilenames();
+    deleteMods(installedModFilenames);
 
-  const installTasks = manifest.mods.map(installMod);
-  const filenames = await Promise.all(installTasks);
-  saveInstalledModFilenames(filenames);
+    const installTasks = manifest.mods.map(installMod);
+    const filenames = await Promise.all(installTasks);
+    saveInstalledModFilenames(filenames);
+  } catch (e) {
+    Logger.error(e);
+  }
 };
 
 const getInstalledModFilenames = (): string[] => {
